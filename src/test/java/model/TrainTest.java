@@ -3,6 +3,7 @@ package model;
 import static org.junit.jupiter.api.Assertions.*;
 
 import exception.TrainException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -31,8 +32,8 @@ class TrainTest {
 		List<Locomotive> locomotiveList = makeDummyLocomotiveList();
 		List<Wagon> wagonList = makeDummyWagonList();
 		Train train = new Train(locomotiveList, wagonList);
-		double emptyWeight = train.getEmptyWeight();
-		assertEquals(120 + 140 + 130 + 150, emptyWeight);
+		BigDecimal emptyWeight = train.getEmptyWeight();
+		assertEquals(BigDecimal.valueOf(120 + 140 + 130 + 150), emptyWeight);
 	}
 
 	@Test
@@ -49,8 +50,8 @@ class TrainTest {
 		List<Locomotive> locomotiveList = makeDummyLocomotiveList();
 		List<Wagon> wagonList = makeDummyWagonList();
 		Train train = new Train(locomotiveList, wagonList);
-		double maxWeightForGoods = train.getMaxWeightForGoods();
-		assertEquals(200 + 220 + 210 + 230, maxWeightForGoods);
+		BigDecimal maxWeightForGoods = train.getMaxWeightForGoods();
+		assertEquals(BigDecimal.valueOf(200 + 220 + 210 + 230), maxWeightForGoods);
 	}
 
 	@Test
@@ -58,8 +59,8 @@ class TrainTest {
 		List<Locomotive> locomotiveList = makeDummyLocomotiveList();
 		List<Wagon> wagonList = makeDummyWagonList();
 		Train train = new Train(locomotiveList, wagonList);
-		double maxPayload = train.getMaxPayload();
-		assertEquals((60 + 80 + 70 + 90) * 75 + 200 + 220 + 210 + 230, maxPayload);
+		BigDecimal maxPayload = train.getMaxPayload();
+		assertEquals(BigDecimal.valueOf((60 + 80 + 70 + 90) * 75 + 200 + 220 + 210 + 230), maxPayload);
 		//passenger number * passenger weight + max weight for goods
 	}
 
@@ -68,16 +69,17 @@ class TrainTest {
 		List<Locomotive> locomotiveList = makeDummyLocomotiveList();
 		List<Wagon> wagonList = makeDummyWagonList();
 		Train train = new Train(locomotiveList, wagonList);
-		double maxTotalWeight = train.getMaxTotalWeight();
-		assertEquals((120 + 140 + 130 + 150) + (60 + 80 + 70 + 90) * 75 + 200 + 220 + 210 + 230, maxTotalWeight);
+		BigDecimal maxTotalWeight = train.getMaxTotalWeight();
+		assertEquals(BigDecimal.valueOf((120 + 140 + 130 + 150) + (60 + 80 + 70 + 90) * 75 + 200 + 220 + 210 + 230),
+				maxTotalWeight);
 		//empty weights + passenger number * passenger weight + max weight for goods
 	}
 
 	@Test
 	void shouldCalculateMaxConductorNumberProperly() {
 		List<Locomotive> locomotiveList1 = new ArrayList<>();
-		Locomotive locomotive1 = new Locomotive();
-		locomotive1.setMaxPassengerNumber(0);
+		Locomotive locomotive1 =
+				new Locomotive(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 0, BigDecimal.ONE, "");
 		locomotiveList1.add(locomotive1);
 
 		Train trainWithoutPassenger = new Train(locomotiveList1);
@@ -85,8 +87,8 @@ class TrainTest {
 		assertEquals(0, maxConductorNumber1);
 
 		List<Locomotive> locomotiveList2 = new ArrayList<>();
-		Locomotive locomotive2 = new Locomotive();
-		locomotive2.setMaxPassengerNumber(1);
+		Locomotive locomotive2 =
+				new Locomotive(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 1, BigDecimal.ONE, "");
 		locomotiveList2.add(locomotive2);
 
 		Train trainWithOnePassenger = new Train(locomotiveList2);
@@ -94,8 +96,8 @@ class TrainTest {
 		assertEquals(1, maxConductorNumber2);
 
 		List<Locomotive> locomotiveList3 = new ArrayList<>();
-		Locomotive locomotive3 = new Locomotive();
-		locomotive3.setMaxPassengerNumber(60);
+		Locomotive locomotive3 =
+				new Locomotive(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 60, BigDecimal.ONE, "");
 		locomotiveList3.add(locomotive3);
 
 		Train trainWith60Passenger = new Train(locomotiveList3);
@@ -106,8 +108,8 @@ class TrainTest {
 	@Test
 	void shouldAddOnlyUniqueLocomotives() {
 		List<Locomotive> locomotiveList = new ArrayList<>();
-		Locomotive locomotive1 = new Locomotive();
-		locomotive1.setSerialNumber("unique1");
+		Locomotive locomotive1 =
+				new Locomotive(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 10, BigDecimal.ONE, "unique1");
 		locomotiveList.add(locomotive1);
 		Train train = new Train(locomotiveList);
 
@@ -117,8 +119,8 @@ class TrainTest {
 		String actualMessage = exception.getMessage();
 		assertTrue(actualMessage.contains(expectedMessage));
 
-		Locomotive locomotive2 = new Locomotive();
-		locomotive1.setSerialNumber("unique2");
+		Locomotive locomotive2 =
+				new Locomotive(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 10, BigDecimal.ONE, "unique2");
 		train.addLocomotive(locomotive2);
 		assertEquals(2, train.getLocomotives().size());
 	}
@@ -126,13 +128,12 @@ class TrainTest {
 	@Test
 	void shouldAddOnlyUniqueWagons() {
 		List<Locomotive> locomotiveList = new ArrayList<>();
-		Locomotive locomotive1 = new Locomotive();
-		locomotive1.setSerialNumber("unique1");
+		Locomotive locomotive1 =
+				new Locomotive(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 10, BigDecimal.ONE, "unique1");
 		locomotiveList.add(locomotive1);
 
 		List<Wagon> wagonList = new ArrayList<>();
-		Wagon wagon1 = new Wagon();
-		wagon1.setSerialNumber("uniqueWagon1");
+		Wagon wagon1 = new Wagon(BigDecimal.ONE, BigDecimal.ONE, 10, BigDecimal.ONE, "uniqueWagon1");
 		wagonList.add(wagon1);
 
 		Train train = new Train(locomotiveList, wagonList);
@@ -143,8 +144,7 @@ class TrainTest {
 		String actualMessage = exception.getMessage();
 		assertTrue(actualMessage.contains(expectedMessage));
 
-		Wagon wagon2 = new Wagon();
-		wagon2.setSerialNumber("uniqueWagon2");
+		Wagon wagon2 = new Wagon(BigDecimal.ZERO, BigDecimal.ZERO, 0, BigDecimal.ZERO, "uniqueWagon2");
 		train.addWagon(wagon2);
 		assertEquals(2, train.getWagons().size());
 	}
@@ -156,26 +156,22 @@ class TrainTest {
 		Train train = new Train(locomotiveList, wagonList);
 		assertFalse(train.isDrivable()); // 1000 < 23900
 
-		locomotiveList.get(0).setEffort(15000);
-		locomotiveList.get(1).setEffort(15000);
+		locomotiveList.get(0).changeEffort(BigDecimal.valueOf(15000));
+		locomotiveList.get(1).changeEffort(BigDecimal.valueOf(15000));
 		assertTrue(train.isDrivable()); // 3000 > 23900
 	}
 
 	private List<Locomotive> makeDummyLocomotiveList() {
 		List<Locomotive> locomotiveList = new ArrayList<>();
 
-		Locomotive locomotive1 = new Locomotive();
-		locomotive1.setWeight(120);
-		locomotive1.setMaxPassengerNumber(60);
-		locomotive1.setMaxGoodWeight(200);
-		locomotive1.setEffort(500);
+		Locomotive locomotive1 =
+				new Locomotive(BigDecimal.valueOf(120), BigDecimal.valueOf(2), BigDecimal.valueOf(500), 60,
+						BigDecimal.valueOf(200), "");
 		locomotiveList.add(locomotive1);
 
-		Locomotive locomotive2 = new Locomotive();
-		locomotive2.setWeight(140);
-		locomotive2.setMaxPassengerNumber(80);
-		locomotive2.setMaxGoodWeight(220);
-		locomotive2.setEffort(500);
+		Locomotive locomotive2 =
+				new Locomotive(BigDecimal.valueOf(140), BigDecimal.valueOf(2), BigDecimal.valueOf(500), 80,
+						BigDecimal.valueOf(220), "");
 		locomotiveList.add(locomotive2);
 
 		return locomotiveList;
@@ -184,16 +180,10 @@ class TrainTest {
 	private List<Wagon> makeDummyWagonList() {
 		List<Wagon> wagonList = new ArrayList<>();
 
-		Wagon wagon1 = new Wagon();
-		wagon1.setWeight(130);
-		wagon1.setMaxPassengerNumber(70);
-		wagon1.setMaxGoodWeight(210);
+		Wagon wagon1 = new Wagon(BigDecimal.valueOf(130), BigDecimal.valueOf(2), 70, BigDecimal.valueOf(210), "");
 		wagonList.add(wagon1);
 
-		Wagon wagon2 = new Wagon();
-		wagon2.setWeight(150);
-		wagon2.setMaxPassengerNumber(90);
-		wagon2.setMaxGoodWeight(230);
+		Wagon wagon2 = new Wagon(BigDecimal.valueOf(150), BigDecimal.valueOf(2), 90, BigDecimal.valueOf(230), "");
 		wagonList.add(wagon2);
 
 		return wagonList;

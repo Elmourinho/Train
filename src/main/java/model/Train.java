@@ -1,20 +1,19 @@
 package model;
 
 import exception.TrainException;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.Getter;
-import lombok.Setter;
 
-@Setter
 @Getter
 public class Train {
 
-	private List<Locomotive> locomotives;
-	private List<Wagon> wagons;
-
 	private static final int PASSENGER_WEIGHT = 75;
 	private static final int PASSENGER_COUNT_PER_CONDUCTOR = 50;
+
+	private final List<Locomotive> locomotives;
+	private final List<Wagon> wagons;
 
 	public Train(List<Locomotive> locomotives) {
 		this(locomotives, new LinkedList<>());
@@ -28,10 +27,14 @@ public class Train {
 		this.wagons = wagons;
 	}
 
-	public double getEmptyWeight() {
-		double locomotiveEmptyWeightSum = locomotives.stream().mapToDouble(Locomotive::getWeight).sum();
-		double wagonEmptyWeightSum = wagons.stream().mapToDouble(Wagon::getWeight).sum();
-		return locomotiveEmptyWeightSum + wagonEmptyWeightSum;
+	public BigDecimal getEmptyWeight() {
+		BigDecimal locomotiveEmptyWeightSum = locomotives.stream()
+				.map(Locomotive::getWeight)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal wagonEmptyWeightSum = wagons.stream()
+				.map(Wagon::getWeight)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		return locomotiveEmptyWeightSum.add(wagonEmptyWeightSum);
 	}
 
 	public Integer getMaxPassengerNumber() {
@@ -40,18 +43,22 @@ public class Train {
 		return locomotiveMaxPassengerSum + wagonMaxPassengerSum;
 	}
 
-	public double getMaxWeightForGoods() {
-		double locomotiveMaxWeightOfGoods = locomotives.stream().mapToDouble(Locomotive::getMaxGoodWeight).sum();
-		double wagonMaxWeightOfGoods = wagons.stream().mapToDouble(Wagon::getMaxGoodWeight).sum();
-		return locomotiveMaxWeightOfGoods + wagonMaxWeightOfGoods;
+	public BigDecimal getMaxWeightForGoods() {
+		BigDecimal locomotiveMaxWeightOfGoods = locomotives.stream()
+				.map(Locomotive::getMaxGoodWeight)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal wagonMaxWeightOfGoods = wagons.stream()
+				.map(Wagon::getMaxGoodWeight)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		return locomotiveMaxWeightOfGoods.add(wagonMaxWeightOfGoods);
 	}
 
-	public double getMaxPayload() {
-		return getMaxPassengerNumber() * PASSENGER_WEIGHT + getMaxWeightForGoods();
+	public BigDecimal getMaxPayload() {
+		return getMaxWeightForGoods().add(BigDecimal.valueOf((long) getMaxPassengerNumber() * PASSENGER_WEIGHT));
 	}
 
-	public double getMaxTotalWeight() {
-		return getEmptyWeight() + getMaxPayload();
+	public BigDecimal getMaxTotalWeight() {
+		return getEmptyWeight().add(getMaxPayload());
 	}
 
 	public int getMaxConductorNumber() {
@@ -79,7 +86,9 @@ public class Train {
 	}
 
 	public boolean isDrivable() {
-		double locomotiveMaxEffortSum = locomotives.stream().mapToDouble(Locomotive::getEffort).sum();
-		return locomotiveMaxEffortSum > getMaxTotalWeight();
+		BigDecimal locomotiveMaxEffortSum = locomotives.stream()
+				.map(Locomotive::getEffort)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		return locomotiveMaxEffortSum.compareTo(getMaxTotalWeight()) > 0;
 	}
 }
